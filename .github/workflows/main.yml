@@ -7,23 +7,38 @@ on:
 jobs:
   render:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      - name: Extract ZIP
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          unzip -o kola-video.zip -d .
+
       - name: Install dependencies
+        working-directory: kola-video
         run: npm install
 
+      - name: Setup browser
+        working-directory: kola-video
+        run: npx remotion browser ensure
+
       - name: Render MP4
-        run: npm run render
+        working-directory: kola-video
+        run: |
+          mkdir -p out
+          npx remotion render src/index.ts Kola out/kola.mp4
 
       - name: Upload video
         uses: actions/upload-artifact@v4
         with:
-          name: kola-video-mp4
-          path: out/kola.mp4
+          name: Kola-Video
+          path: kola-video/out/kola.mp4
